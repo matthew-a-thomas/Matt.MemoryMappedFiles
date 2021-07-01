@@ -2,7 +2,10 @@ namespace Matt.MemoryMappedFiles
 {
     using System;
 
-    public class ReadOnlySpanProvider : IDisposable
+    /// <summary>
+    /// Provides read-only <see cref="ReadOnlySpan{T}"/>s at potentially very large offsets from a pointer.
+    /// </summary>
+    public sealed class ReadOnlySpanProvider : IDisposable
     {
         readonly unsafe byte* _baseAddress;
         readonly IDisposable _disposable;
@@ -18,6 +21,10 @@ namespace Matt.MemoryMappedFiles
             _length = length;
         }
 
+        /// <summary>
+        /// Returns a <see cref="ReadOnlySpan{T}"/> that starts at the given <paramref name="offset"/> and covers
+        /// <paramref name="length"/> bytes.
+        /// </summary>
         public ReadOnlySpan<byte> GetReadOnlySpan(
             long offset,
             int length)

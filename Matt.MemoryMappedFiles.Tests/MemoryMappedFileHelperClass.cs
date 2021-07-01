@@ -18,7 +18,7 @@
             });
         }
 
-        public class GetSpanProviderMethodShould
+        public class CreateSpanProviderMethodShould
         {
             [Fact]
             public void FailToProvideWritableSpanForReadOnlyFile()
@@ -36,7 +36,7 @@
 
                 Assert.ThrowsAny<Exception>(() =>
                 {
-                    using var spanProvider = helper.GetSpanProvider(readableFile);
+                    using var spanProvider = helper.CreateSpanProvider(readableFile);
                 });
             }
 
@@ -47,7 +47,7 @@
                 using var file = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
                 file.SetLength(1);
                 var helper = new MemoryMappedFileHelper();
-                using var spanProvider = helper.GetSpanProvider(file);
+                using var spanProvider = helper.CreateSpanProvider(file);
                 var span = spanProvider.GetSpan(0, 1);
 
                 for (var i = 0; i < 256; ++i)
@@ -64,7 +64,7 @@
             }
         }
 
-        public class GetReadOnlySpanProviderMethodShould
+        public class CreateReadOnlySpanProviderMethodShould
         {
             [Fact]
             public void SuccessfullyReadDataFromReadOnlyFile()
@@ -78,7 +78,7 @@
                 {
                     var helper = new MemoryMappedFileHelper();
 
-                    using var spanProvider = helper.GetReadOnlySpanProvider(file);
+                    using var spanProvider = helper.CreateReadOnlySpanProvider(file);
                     var span = spanProvider.GetReadOnlySpan(0, 13);
                     var s = Encoding.UTF8.GetString(span);
 

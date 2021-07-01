@@ -4,9 +4,12 @@ namespace Matt.MemoryMappedFiles
     using System.IO;
     using System.IO.MemoryMappedFiles;
 
-    public class MemoryMappedFileHelper
+    /// <summary>
+    /// Helps expose memory mapped files as <see cref="Span{T}"/>s.
+    /// </summary>
+    public sealed class MemoryMappedFileHelper
     {
-        unsafe byte* AcquirePointer(
+        static unsafe byte* AcquirePointer(
             FileStream stream,
             MemoryMappedFileAccess access,
             out IDisposable disposable)
@@ -41,8 +44,17 @@ namespace Matt.MemoryMappedFiles
             }
         }
 
-        public SpanProvider GetSpanProvider(
-            FileStream stream)
+        /// <summary>
+        /// Creates a <see cref="SpanProvider"/> which can create writable <see cref="Span{T}"/>s from the given
+        /// <see cref="FileStream"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The given <see cref="FileStream"/> must support writing or an exception will be thrown. The file must also
+        /// have a non-zero size.
+        /// </para>
+        /// </remarks>
+        public SpanProvider CreateSpanProvider(FileStream stream)
         {
             unsafe
             {
@@ -58,8 +70,16 @@ namespace Matt.MemoryMappedFiles
             }
         }
 
-        public ReadOnlySpanProvider GetReadOnlySpanProvider(
-            FileStream stream)
+        /// <summary>
+        /// Creates a <see cref="ReadOnlySpanProvider"/> which can create read-only <see cref="ReadOnlySpan{T}"/>s from
+        /// the given <see cref="FileStream"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The given <see cref="FileStream"/> must have a non-zero size or an exception will be thrown.
+        /// </para>
+        /// </remarks>
+        public ReadOnlySpanProvider CreateReadOnlySpanProvider(FileStream stream)
         {
             unsafe
             {

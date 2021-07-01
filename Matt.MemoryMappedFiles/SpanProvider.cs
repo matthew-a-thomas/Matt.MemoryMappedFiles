@@ -2,7 +2,10 @@ namespace Matt.MemoryMappedFiles
 {
     using System;
 
-    public class SpanProvider : IDisposable
+    /// <summary>
+    /// Provides writable <see cref="Span{T}"/>s at potentially very large offsets from a pointer.
+    /// </summary>
+    public sealed class SpanProvider : IDisposable
     {
         readonly unsafe byte* _baseAddress;
         readonly IDisposable _disposable;
@@ -18,6 +21,10 @@ namespace Matt.MemoryMappedFiles
             _length = length;
         }
 
+        /// <summary>
+        /// Returns a <see cref="Span{T}"/> that starts at the given <paramref name="offset"/> and covers
+        /// <paramref name="length"/> bytes.
+        /// </summary>
         public Span<byte> GetSpan(
             long offset,
             int length)
@@ -27,7 +34,7 @@ namespace Matt.MemoryMappedFiles
             if (length < 0)
                 throw new ArgumentOutOfRangeException(nameof(length));
             if (offset + length > _length)
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(length));
             unsafe
             {
                 return new Span<byte>(
