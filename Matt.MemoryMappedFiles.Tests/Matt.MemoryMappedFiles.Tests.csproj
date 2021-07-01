@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MemoryMappedFiles\MemoryMappedFiles.csproj" />
+      <ProjectReference Include="..\Matt.MemoryMappedFiles\Matt.MemoryMappedFiles.csproj" />
     </ItemGroup>
 
 </Project>

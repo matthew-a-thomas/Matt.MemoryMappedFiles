@@ -1,4 +1,4 @@
-﻿namespace MemoryMappedFiles.Tests
+﻿namespace Matt.MemoryMappedFiles.Tests
 {
     using System;
     using System.IO;

@@ -1,14 +1,14 @@
-namespace MemoryMappedFiles
+namespace Matt.MemoryMappedFiles
 {
     using System;
 
-    public class SpanProvider : IDisposable
+    public class ReadOnlySpanProvider : IDisposable
     {
         readonly unsafe byte* _baseAddress;
         readonly IDisposable _disposable;
         readonly long _length;
 
-        public unsafe SpanProvider(
+        public unsafe ReadOnlySpanProvider(
             byte* baseAddress,
             IDisposable disposable,
             long length)
@@ -18,7 +18,7 @@ namespace MemoryMappedFiles
             _length = length;
         }
 
-        public Span<byte> GetSpan(
+        public ReadOnlySpan<byte> GetReadOnlySpan(
             long offset,
             int length)
         {

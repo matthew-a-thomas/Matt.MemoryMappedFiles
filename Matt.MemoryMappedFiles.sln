@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryMappedFiles", "MemoryMappedFiles\MemoryMappedFiles.csproj", "{FE28C9AE-F34D-4EDD-9812-19E12B04737D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matt.MemoryMappedFiles", "Matt.MemoryMappedFiles\Matt.MemoryMappedFiles.csproj", "{FE28C9AE-F34D-4EDD-9812-19E12B04737D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryMappedFiles.Tests", "MemoryMappedFiles.Tests\MemoryMappedFiles.Tests.csproj", "{A832C74F-0EC1-4F76-A4B6-B3FAB078BF1E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matt.MemoryMappedFiles.Tests", "Matt.MemoryMappedFiles.Tests\Matt.MemoryMappedFiles.Tests.csproj", "{A832C74F-0EC1-4F76-A4B6-B3FAB078BF1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

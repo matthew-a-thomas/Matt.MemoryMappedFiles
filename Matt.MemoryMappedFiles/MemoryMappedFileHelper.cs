@@ -1,4 +1,4 @@
-namespace MemoryMappedFiles
+namespace Matt.MemoryMappedFiles
 {
     using System;
     using System.IO;
