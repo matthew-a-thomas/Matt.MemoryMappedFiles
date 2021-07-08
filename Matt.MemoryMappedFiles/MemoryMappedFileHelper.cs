@@ -7,7 +7,7 @@ namespace Matt.MemoryMappedFiles
     /// <summary>
     /// Helps expose memory mapped files as <see cref="Span{T}"/>s.
     /// </summary>
-    public sealed class MemoryMappedFileHelper
+    public static class MemoryMappedFileHelper
     {
         static unsafe byte* AcquirePointer(
             FileStream stream,
@@ -54,7 +54,7 @@ namespace Matt.MemoryMappedFiles
         /// have a non-zero size.
         /// </para>
         /// </remarks>
-        public SpanProvider CreateSpanProvider(FileStream stream)
+        public static SpanProvider CreateSpanProvider(FileStream stream)
         {
             unsafe
             {
@@ -79,7 +79,7 @@ namespace Matt.MemoryMappedFiles
         /// The given <see cref="FileStream"/> must have a non-zero size or an exception will be thrown.
         /// </para>
         /// </remarks>
-        public ReadOnlySpanProvider CreateReadOnlySpanProvider(FileStream stream)
+        public static ReadOnlySpanProvider CreateReadOnlySpanProvider(FileStream stream)
         {
             unsafe
             {

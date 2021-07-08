@@ -32,11 +32,10 @@
                     FileAccess.Read,
                     FileShare.ReadWrite
                 );
-                var helper = new MemoryMappedFileHelper();
 
                 Assert.ThrowsAny<Exception>(() =>
                 {
-                    using var spanProvider = helper.CreateSpanProvider(readableFile);
+                    using var spanProvider = MemoryMappedFileHelper.CreateSpanProvider(readableFile);
                 });
             }
 
@@ -46,8 +45,7 @@
                 using var _ = CreateTempFile(out var path);
                 using var file = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
                 file.SetLength(1);
-                var helper = new MemoryMappedFileHelper();
-                using var spanProvider = helper.CreateSpanProvider(file);
+                using var spanProvider = MemoryMappedFileHelper.CreateSpanProvider(file);
                 var span = spanProvider.GetSpan(0, 1);
 
                 for (var i = 0; i < 256; ++i)
@@ -76,9 +74,7 @@
                 }
                 using (var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    var helper = new MemoryMappedFileHelper();
-
-                    using var spanProvider = helper.CreateReadOnlySpanProvider(file);
+                    using var spanProvider = MemoryMappedFileHelper.CreateReadOnlySpanProvider(file);
                     var span = spanProvider.GetReadOnlySpan(0, 13);
                     var s = Encoding.UTF8.GetString(span);
 
