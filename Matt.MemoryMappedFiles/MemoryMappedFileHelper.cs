@@ -1,23 +1,27 @@
 namespace Matt.MemoryMappedFiles
 {
     using System;
+    using System.Buffers;
     using System.IO;
     using System.IO.MemoryMappedFiles;
 
     /// <summary>
-    /// Helps expose memory mapped files as <see cref="Span{T}"/>s.
+    /// Helps expose memory mapped files as <see cref="Memory{T}"/>s.
     /// </summary>
     public static class MemoryMappedFileHelper
     {
         static unsafe byte* AcquirePointer(
             FileStream stream,
             MemoryMappedFileAccess access,
-            out IDisposable disposable)
+            bool keepOpen,
+            out StackDisposable disposable)
         {
             var stackDisposable = new StackDisposable();
             disposable = stackDisposable;
             try
             {
+                if (!keepOpen)
+                    stackDisposable.Push(stream);
                 var memoryMappedFile = MemoryMappedFile.CreateFromFile(
                     fileStream: stream,
                     mapName: null,
@@ -37,62 +41,55 @@ namespace Matt.MemoryMappedFiles
                 stackDisposable.Push(Disposable.Create(handle.ReleasePointer));
                 return pointer;
             }
-            catch
+            catch (Exception e)
             {
                 stackDisposable.Dispose();
-                throw;
+                throw new Exception("Failed to acquire a pointer to the memory mapped file", e);
             }
         }
 
         /// <summary>
-        /// Creates a <see cref="SpanProvider"/> which can create writable <see cref="Span{T}"/>s from the given
-        /// <see cref="FileStream"/>.
+        /// Creates a <see cref="MemoryManager{T}"/> that exposes <see cref="Memory{T}"/> covering the indicated range
+        /// of the given <see cref="FileStream"/>.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// The given <see cref="FileStream"/> must support writing or an exception will be thrown. The file must also
-        /// have a non-zero size.
+        /// You have to be careful that read/write access aligns with the permissions of the given
+        /// <see cref="FileStream"/>, the given <paramref name="access"/> parameter, and how the <see cref="Memory{T}"/>
+        /// is used in the returned <see cref="MemoryManager{T}"/>.
         /// </para>
-        /// </remarks>
-        public static SpanProvider CreateSpanProvider(FileStream stream)
-        {
-            unsafe
-            {
-                var pointer = AcquirePointer(
-                    stream: stream,
-                    access: MemoryMappedFileAccess.ReadWrite,
-                    out var disposable);
-                return new SpanProvider(
-                    baseAddress: pointer,
-                    disposable: disposable,
-                    length: stream.Length
-                );
-            }
-        }
-
-        /// <summary>
-        /// Creates a <see cref="ReadOnlySpanProvider"/> which can create read-only <see cref="ReadOnlySpan{T}"/>s from
-        /// the given <see cref="FileStream"/>.
-        /// </summary>
-        /// <remarks>
         /// <para>
-        /// The given <see cref="FileStream"/> must have a non-zero size or an exception will be thrown.
+        /// Disposing of the returned <see cref="MemoryManager{T}"/> will dispose of the given <see cref="FileStream"/>
+        /// if <paramref name="keepOpen"/> is false.
         /// </para>
         /// </remarks>
-        public static ReadOnlySpanProvider CreateReadOnlySpanProvider(FileStream stream)
+        public static unsafe MemoryManager<byte> CreateMemoryManager(
+            FileStream fileStream,
+            MemoryMappedFileAccess access,
+            long offset = 0,
+            int? length = null,
+            bool keepOpen = false)
         {
-            unsafe
-            {
-                var pointer = AcquirePointer(
-                    stream: stream,
-                    access: MemoryMappedFileAccess.Read,
-                    out var disposable);
-                return new ReadOnlySpanProvider(
-                    baseAddress: pointer,
-                    disposable: disposable,
-                    length: stream.Length
-                );
-            }
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            if (length < 0)
+                throw new ArgumentOutOfRangeException(nameof(length));
+            var fileLength = fileStream.Length;
+            length ??= (int) Math.Min(int.MaxValue, fileLength - offset);
+            if (offset + length > fileLength)
+                throw new ArgumentOutOfRangeException(nameof(length));
+            var baseAddress = AcquirePointer(
+                fileStream,
+                access,
+                keepOpen,
+                out var disposable);
+            return new InjectedMemoryManager<byte>(
+                () => new Span<byte>(
+                    pointer: baseAddress + offset,
+                    length: length.Value
+                ),
+                dispose: disposable.Dispose
+            );
         }
     }
 }

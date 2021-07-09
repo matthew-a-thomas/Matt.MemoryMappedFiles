@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.IO.MemoryMappedFiles;
     using System.Text;
     using Xunit;
 
@@ -18,7 +19,7 @@
             });
         }
 
-        public class CreateSpanProviderMethodShould
+        public class CreateMemoryManagerMethodShould
         {
             [Fact]
             public void FailToProvideWritableSpanForReadOnlyFile()
@@ -35,7 +36,7 @@
 
                 Assert.ThrowsAny<Exception>(() =>
                 {
-                    using var spanProvider = MemoryMappedFileHelper.CreateSpanProvider(readableFile);
+                    using var memoryManager = MemoryMappedFileHelper.CreateMemoryManager(readableFile, MemoryMappedFileAccess.ReadWrite);
                 });
             }
 
@@ -45,8 +46,8 @@
                 using var _ = CreateTempFile(out var path);
                 using var file = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
                 file.SetLength(1);
-                using var spanProvider = MemoryMappedFileHelper.CreateSpanProvider(file);
-                var span = spanProvider.GetSpan(0, 1);
+                using var memoryManager = MemoryMappedFileHelper.CreateMemoryManager(file, MemoryMappedFileAccess.ReadWrite);
+                var span = memoryManager.Memory.Span[..1];
 
                 for (var i = 0; i < 256; ++i)
                 {
@@ -60,10 +61,7 @@
                     Assert.Equal(0xa5, span[0]);
                 }
             }
-        }
 
-        public class CreateReadOnlySpanProviderMethodShould
-        {
             [Fact]
             public void SuccessfullyReadDataFromReadOnlyFile()
             {
@@ -74,8 +72,8 @@
                 }
                 using (var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    using var spanProvider = MemoryMappedFileHelper.CreateReadOnlySpanProvider(file);
-                    var span = spanProvider.GetReadOnlySpan(0, 13);
+                    using var memoryManager = MemoryMappedFileHelper.CreateMemoryManager(file, MemoryMappedFileAccess.Read);
+                    ReadOnlySpan<byte> span = memoryManager.Memory.Span[..13];
                     var s = Encoding.UTF8.GetString(span);
 
                     Assert.Equal("Hello, world!", s);
