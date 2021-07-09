@@ -14,7 +14,8 @@ namespace Matt.MemoryMappedFiles
             FileStream stream,
             MemoryMappedFileAccess access,
             bool keepOpen,
-            out StackDisposable disposable)
+            out StackDisposable disposable,
+            out Action flush)
         {
             var stackDisposable = new StackDisposable();
             disposable = stackDisposable;
@@ -34,6 +35,7 @@ namespace Matt.MemoryMappedFiles
                     offset: 0,
                     size: 0,
                     access: access);
+                flush = viewAccessor.Flush;
                 stackDisposable.Push(viewAccessor);
                 var handle = viewAccessor.SafeMemoryMappedViewHandle;
                 byte* pointer = default;
@@ -66,6 +68,7 @@ namespace Matt.MemoryMappedFiles
         public static unsafe MemoryManager<byte> CreateMemoryManager(
             FileStream fileStream,
             MemoryMappedFileAccess access,
+            out Action flush,
             long offset = 0,
             int? length = null,
             bool keepOpen = false)
@@ -82,7 +85,8 @@ namespace Matt.MemoryMappedFiles
                 fileStream,
                 access,
                 keepOpen,
-                out var disposable);
+                out var disposable,
+                out flush);
             return new InjectedMemoryManager<byte>(
                 () => new Span<byte>(
                     pointer: baseAddress + offset,

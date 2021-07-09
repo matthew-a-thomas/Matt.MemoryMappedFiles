@@ -24,7 +24,7 @@
             [Fact]
             public void FailToProvideWritableSpanForReadOnlyFile()
             {
-                using var _ = CreateTempFile(out var path);
+                using var tempFile = CreateTempFile(out var path);
                 using (var file = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                     file.SetLength(1);
                 using var readableFile = File.Open(
@@ -36,17 +36,17 @@
 
                 Assert.ThrowsAny<Exception>(() =>
                 {
-                    using var memoryManager = MemoryMappedFileHelper.CreateMemoryManager(readableFile, MemoryMappedFileAccess.ReadWrite);
+                    using var memoryManager = MemoryMappedFileHelper.CreateMemoryManager(readableFile, MemoryMappedFileAccess.ReadWrite, out _);
                 });
             }
 
             [Fact]
             public void SupportReadingAndWritingToAFile()
             {
-                using var _ = CreateTempFile(out var path);
+                using var tempFile = CreateTempFile(out var path);
                 using var file = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
                 file.SetLength(1);
-                using var memoryManager = MemoryMappedFileHelper.CreateMemoryManager(file, MemoryMappedFileAccess.ReadWrite);
+                using var memoryManager = MemoryMappedFileHelper.CreateMemoryManager(file, MemoryMappedFileAccess.ReadWrite, out _);
                 var span = memoryManager.Memory.Span[..1];
 
                 for (var i = 0; i < 256; ++i)
@@ -65,14 +65,14 @@
             [Fact]
             public void SuccessfullyReadDataFromReadOnlyFile()
             {
-                using var _ = CreateTempFile(out var path);
+                using var tempFile = CreateTempFile(out var path);
                 using (var file = File.Open(path, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
                 {
                     file.Write(Encoding.UTF8.GetBytes("Hello, world!"));
                 }
                 using (var file = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    using var memoryManager = MemoryMappedFileHelper.CreateMemoryManager(file, MemoryMappedFileAccess.Read);
+                    using var memoryManager = MemoryMappedFileHelper.CreateMemoryManager(file, MemoryMappedFileAccess.Read, out _);
                     ReadOnlySpan<byte> span = memoryManager.Memory.Span[..13];
                     var s = Encoding.UTF8.GetString(span);
 
